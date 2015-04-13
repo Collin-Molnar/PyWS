@@ -1,4 +1,5 @@
 #!flask/bin/python
+# -*- coding: utf-8 -*-
 
 '''
 Created on Apr 11, 2015
@@ -34,6 +35,8 @@ def gps(station):
     print analysis_center
     print reference_frame
     
+    print_header()
+    
     file_location = ARCHIVE_POS_LOCS + "/" + station + "/" + station + "." + analysis_center + "." + reference_frame + ".pos"
     pp = ProcessPos(file_location)
     result = pp.getoutput().splitlines()
@@ -56,6 +59,26 @@ def gps(station):
     
 def create_output():
     pass
+
+def print_header():
+        output.write("# fields: DateTime, X, Y, Z, X Std. Dev, Y Std. Dev, Z Std. Dev, XY Correlation, XZ Correlation, YZ Correlation, North Latitude, East Longitude, Height,  North, East, Vertical, North Std. Dev.(m), East Std. Dev.(m), Vertical Std. Dev.(m), NorthEast Correlation, NorthVertical Correlation, EastVertical Correlation, Solution")
+        output.write("\n")     
+        output.write("# f​ield_unit: ISO 8601 datetime UTC, meters, meters, meters, millimeters, millimeters, millimeters, number, number, number, degrees, degrees, meters, meters, meters, meters, meters, meters, meters, number, number, number, UTF-8")
+        output.write("\n")
+        output.write("# f​ield_type: s​tring, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, string")
+        output.write("\n")
+        output.write("# attribution: h​ttp:#www.unavco.org/community/policies_forms/attribution/attribution.html")
+        output.write("\n")
+        
+        # Create URL 
+        output.write("# url: http:#web-services.unavco.org")
+        output.write("myURI")
+        output.write("\n")
+        
+        # Reference Coordinate 
+        output.write("# ")
+        output.write("refCoord")
+        output.write("\n")
 
 @app.route('/')
 def init():
