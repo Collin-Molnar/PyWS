@@ -16,6 +16,10 @@ output = StringIO.StringIO()
 
 @app.route('/gps/data/position/<station>/v2')
 def gps(station):
+    #########################################################
+    # Get query parameters 
+    #########################################################
+
     reference_frame = request.args.get('referenceFrame')          # nam08
     analysis_center = request.args.get('analysisCenter')         # pbo
     starttime = request.args.get('starttime')                    # 2006-01-01T00%3A00%3A00&
@@ -29,22 +33,15 @@ def gps(station):
     starttime = datetime.datetime.strptime(starttime, ISO_8601)
     endtime = datetime.datetime.strptime(endtime, ISO_8601)
     
-    create_output()
-    
-    print station
-    print analysis_center
-    print reference_frame
-    
     print_header()
     
+    # Position file location
     file_location = ARCHIVE_POS_LOCS + "/" + station + "/" + station + "." + analysis_center + "." + reference_frame + ".pos"
     pp = ProcessPos(file_location)
     result = pp.getoutput().splitlines()
-    print starttime
-    print endtime
-
     
     for line in result:
+        # Get the date at the beginning of the line and put into a datetime object.
         tempdate = line.split()[0]
         tempdate = datetime.date(int(tempdate[:4]), int(tempdate[4:6]), int(tempdate[6:]))
         
@@ -53,12 +50,9 @@ def gps(station):
             output.write(line)
             output.write("\n")
     
-    
+    # Set the files position curser to the beginning. 
     output.seek(0)
     return send_file(output, attachment_filename="testing.txt", as_attachment=True)
-    
-def create_output():
-    pass
 
 def print_header():
         output.write("# fields: DateTime, X, Y, Z, X Std. Dev, Y Std. Dev, Z Std. Dev, XY Correlation, XZ Correlation, YZ Correlation, North Latitude, East Longitude, Height,  North, East, Vertical, North Std. Dev.(m), East Std. Dev.(m), Vertical Std. Dev.(m), NorthEast Correlation, NorthVertical Correlation, EastVertical Correlation, Solution")
