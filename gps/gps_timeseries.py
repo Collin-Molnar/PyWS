@@ -8,23 +8,45 @@ Created on Apr 11, 2015
 '''
 from flask import Flask, request, send_file
 import StringIO
-from gps.ProcessPos import ProcessPos
+from geodetic import ProcessPos
 import datetime
+from util import validator
+from util.validator import check_ref_frame, check_analysis_center,\
+    check_ts_format
+import geodetic
+
 
 app = Flask(__name__)
 output = StringIO.StringIO()
 
 @app.route('/gps/data/position/<station>/v2')
 def gps(station):
+    #http://127.0.0.1:5000/gps/data/position/P378/v2?referenceFrame=igs08&analysisCenter=pbo&starttime=2008-01-01T00%3A00%3A00&endtime=2008-03-01T00%3A00%3A00&tsFormat=iso8601&stdDevRange=false
     #########################################################
-    # Get query parameters 
+    # Get query parameters
     #########################################################
-
-    reference_frame = request.args.get('referenceFrame')          # nam08
+    
+    
+    
+    reference_frame = request.args.get('referenceFrame')         # nam08
+    if not check_ref_frame(reference_frame):
+        pass
+        # TODO: Create errors 
+        
     analysis_center = request.args.get('analysisCenter')         # pbo
+    if not check_analysis_center(analysis_center):
+        pass
+        # TODO: Create errors 
+    
+    ts_format = request.args.get('tsFormat')                      # iso8601&
+    if not check_ts_format(ts_format):
+        pass
+        #TODO: Create error 
+    
+    # TODO: Necesary to validate or just use strp time. 
     starttime = request.args.get('starttime')                    # 2006-01-01T00%3A00%3A00&
     endtime = request.args.get('endtime')                        # 2012-03-01T00%3A00%3A00&
-    tsFormat = request.args.get('tsFormat')                      # iso8601&
+    
     stdDevRange = request.args.get('std_dev_range')              # false
     
     ARCHIVE_POS_LOCS = "pub/products/position"
@@ -37,7 +59,7 @@ def gps(station):
     
     # Position file location
     file_location = ARCHIVE_POS_LOCS + "/" + station + "/" + station + "." + analysis_center + "." + reference_frame + ".pos"
-    pp = ProcessPos(file_location)
+    pp = ProcessPos.ProcessPos(file_location)
     result = pp.getoutput().splitlines()
     
     for line in result:
