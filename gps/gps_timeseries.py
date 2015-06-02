@@ -50,7 +50,7 @@ def gps(station):
             output.write(line)
             output.write("\n")
     
-    # Set the files position curser to the beginning. 
+    # Set the files position cursor to the beginning. 
     output.seek(0)
     return send_file(output, attachment_filename="testing.txt", as_attachment=True)
 
