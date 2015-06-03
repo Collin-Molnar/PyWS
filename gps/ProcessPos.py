@@ -6,7 +6,7 @@ Created on Mar 18, 2015
 from StringIO import StringIO
 import ftplib
 from ftplib import FTP
-import geodetic
+from geodetic import geodetic
 
 class ProcessPos:
     
@@ -33,13 +33,10 @@ class ProcessPos:
             
             if i == 7:
                 ref_xyz = tuple([float(j) for j in line.split()[4:7]])
-                print 'REF XYZ'
-                print ref_xyz
-                
+                self.output += str(ref_xyz) + "\n"
+              
             elif i == 8:
                 ref_llh = tuple([float(j) for j in line.split()[4:7]])
-                print "REF LLH"
-                print ref_llh
                 
             elif i > 36:
                 dataline = [float(j) for j in line.split() if self.is_number(j)]
@@ -48,7 +45,6 @@ class ProcessPos:
                 P1 = geodetic.Point(*point)
                 # (N, E, U, sigma_E, sigma_N, sigma_U, EN corr, EU corr, NU corr)
                 test_neu = P1.neu(*ref_xyz)
-            
                 self.output += "{0:<125}{1[0]:<15.10f}{1[1]:<15.10f}{1[1]:<15.10f}{1[4]:<15.10f}{1[3]:<15.10f}{1[5]:<15.10f}{1[6]:<15.10f}{1[8]:<15.10f}{1[7]:<15.10f}{2:}\n".format(line[:120], test_neu, dataline[24])
             
     def is_number(self, s):
