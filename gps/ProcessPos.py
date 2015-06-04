@@ -4,16 +4,46 @@ Created on Mar 18, 2015
 @author: molnar
 '''
 from StringIO import StringIO
+from datetime import datetime
 import ftplib
+import urllib2
 from ftplib import FTP
 from geodetic import geodetic
 
+UNR_TS_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 class ProcessPos:
+        
+    def __init__(self, file_location):
+        self.file = file_location
     
-    def __init__(self, posFile):
-        self.get_file(posFile)
-    
-    def get_file(self, posfile):
+    def process_unr(self, ref_frame, strt_time, end_time):
+        self.reference_frame = ref_frame
+        self.strt_time = strt_time
+        self.end_time = end_time
+        
+        response = urllib2.urlopen(self.file)
+        gsac_return = response.read()
+        lines = self.get_unr_file(gsac_return)
+        print lines
+        
+    def get_unr_file(self, gsac_return):
+        for line in gsac_return.split("\n"):
+            if "#" in line:
+                continue
+            elif(line != ""):
+                file_strt_time = datetime.strptime(line.split(",")[6], UNR_TS_FORMAT)
+                file_end_time = datetime.strptime(line.split(",")[7], UNR_TS_FORMAT)
+                
+                # Get file name from the 5th object in csv line.
+                # Then split on '/' to get neu/xyz and ref frame.
+                # Then grab coord_type from the 4th and 5th index. 
+                coord_type, file_ref_frame = line.split(",")[5].split("/")[4:6]
+                print coord_type
+                print file_ref_frame
+                
+                
+    def get_unavco_file(self):
         ftp = FTP('data-out.unavco.org')
         ftp.login()
         r = StringIO()
@@ -65,7 +95,7 @@ if __name__ == '__main__':
     
     posfile = args.file
     
-#     get_file(posfile)
+#     get_unavco_file(posfile)
                     
         
 
