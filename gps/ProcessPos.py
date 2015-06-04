@@ -24,10 +24,10 @@ class ProcessPos:
         
         response = urllib2.urlopen(self.file)
         gsac_return = response.read()
-        lines = self.get_unr_file(gsac_return)
+        lines = self.get_unr_file_name(gsac_return)
         print lines
         
-    def get_unr_file(self, gsac_return):
+    def get_unr_file_name(self, gsac_return):
         for line in gsac_return.split("\n"):
             if "#" in line:
                 continue
@@ -38,11 +38,18 @@ class ProcessPos:
                 # Get file name from the 5th object in csv line.
                 # Then split on '/' to get neu/xyz and ref frame.
                 # Then grab coord_type from the 4th and 5th index. 
-                coord_type, file_ref_frame = line.split(",")[5].split("/")[4:6]
-                print coord_type
-                print file_ref_frame
+                file_url = line.split(",")[5]
+                coord_type, file_ref_frame = file_url.split("/")[4:6]
                 
-                
+                if (coord_type == "txyz" and file_ref_frame.lower() == self.reference_frame):
+                    print file_url
+                    self.get_unr_file(file_url)   
+                    
+    def get_unr_file(self, file_url):
+        response = urllib2.urlopen(file_url)
+        html = response.read()
+        print html
+        
     def get_unavco_file(self):
         ftp = FTP('data-out.unavco.org')
         ftp.login()
@@ -69,6 +76,7 @@ class ProcessPos:
                 ref_llh = tuple([float(j) for j in line.split()[4:7]])
                 
             elif i > 36:
+                # TODO: 
                 dataline = [float(j) for j in line.split() if self.is_number(j)]
                 dataline.append(line.split()[24])
                 point = tuple(dataline[3:12])
